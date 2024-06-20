@@ -1,0 +1,36 @@
+<html>
+    <script>
+        function generatekeys(){
+            const p=parseInt(document.getElementById("p").value);
+            const a=parseInt(document.getElementById("a").value);
+            const x1=parseInt(document.getElementById("x1").value);//alice private key
+            const x2=parseInt(document.getElementById("x2").value);//bob private key
+
+            const y1=BigInt(a)**BigInt(x1)%BigInt(p);
+            const y2=BigInt(a)**BigInt(x2)%BigInt(p);
+
+            const k1=BigInt(y2)**BigInt(x1)%BigInt(p);
+            const k2=BigInt(y1)**BigInt(x2)%BigInt(p);
+
+            document.getElementById('output').innerHTML=`
+            <p>Alice public key ${y1}</p>
+            <p>Bob public key ${y2}</p>
+            <p>Alice shared key key ${k1}</p>
+            <p>bob shared key ${k2}</p>
+            `;
+        }
+    </script>
+    <body>
+        <h1>Diffie helman</h1>
+        <label for="p">Enter a:</label>
+        <input type="number" id="p" required><br><br>
+        <label for="a">Enter a:</label>
+        <input type="number" id="a" required><br><br>
+        <label for="x1">Enter alice private key:</label>
+        <input type="number" id="x1" required><br><br>
+        <label for="x2">Enter bob private key:</label>
+        <input type="number" id="x2" required><br><br>
+        <button onclick="generatekeys()">Generate key</button>
+        <div id="output"></div>
+    </body>
+</html>
