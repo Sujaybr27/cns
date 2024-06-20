@@ -1,99 +1,58 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-void railfence_encipher(int key, const char *plaintext, char *ciphertext);
-void railfence_decipher(int key, const char *ciphertext, char *plaintext);
+void generateVigenereTable(char table[26][26]) {
+    for (int i = 0; i < 26; ++i) {
+        for (int j = 0; j < 26; ++j) {
+            table[i][j] = ((i + j) % 26) + 'A';
+        }
+    }
+}
 
 int main() {
-    int key;
-    char plaintext[100];
+    char msg[] = "THECRAZYPROGRAMMER";
+    char key[] = "HELLO";
+    int msgLen = strlen(msg), keyLen = strlen(key), i, j;
+    char newKey[msgLen], encryptedMsg[msgLen], decryptedMsg[msgLen];
+    char vigenereTable[26][26];
 
-    printf("Enter the plaintext: ");
-    fgets(plaintext, sizeof(plaintext), stdin);
-    plaintext[strcspn(plaintext, "\n")] = '\0'; // Remove newline character
+    generateVigenereTable(vigenereTable);
 
-    printf("Enter the number of rails: ");
-    scanf("%d", &key);
+    for (i = 0, j = 0; i < msgLen; ++i, ++j) {
+        if (j == keyLen)
+            j = 0;
+        newKey[i] = key[j];
+    }
+    newKey[i] = '\0';
 
-    /* allocate some space for results of enciphering/deciphering */
-    char *ciphertext = malloc(strlen(plaintext) + 1);
-    char *result = malloc(strlen(plaintext) + 1);
+    for (i = 0; i < msgLen; ++i) {
+        encryptedMsg[i] = vigenereTable[msg[i] - 'A'][newKey[i] - 'A'];
+    }
+    encryptedMsg[i] = '\0';
 
-    /* the following lines do all the enciphering and deciphering */
-    railfence_encipher(key, plaintext, ciphertext);
-    railfence_decipher(key, ciphertext, result);
+    for (i = 0; i < msgLen; ++i) {
+        for (j = 0; j < 26; ++j) {
+            if (vigenereTable[newKey[i] - 'A'][j] == encryptedMsg[i]) {
+                decryptedMsg[i] = 'A' + j;
+                break;
+            }
+        }
+    }
+    decryptedMsg[i] = '\0';
 
-    /* print our results */
-    printf("-->original: %s\n-->ciphertext: %s\n-->plaintext: %s\n",
-           plaintext, ciphertext, result);
+    printf("Vigenère Table:\n");
+    for (i = 0; i < 26; ++i) {
+        for (j = 0; j < 26; ++j) {
+            printf("%c ", vigenereTable[i][j]);
+        }
+        printf("\n");
+    }
 
-    free(ciphertext);
-    free(result);
+    printf("\nOriginal Message: %s", msg);
+    printf("\nKey: %s", key);
+    printf("\nNew Generated Key: %s", newKey);
+    printf("\nEncrypted Message: %s", encryptedMsg);
+    printf("\nDecrypted Message: %s", decryptedMsg);
+
     return 0;
-}
-
-/*******************************************************************
- * void railfence_encipher(int key, const char *plaintext, char *ciphertext)
- * - Uses railfence transposition cipher to encipher some text.
- * - takes a key, string of plaintext, result returned in ciphertext.
- * - ciphertext should be an array the same size as plaintext.
- * - The key is the number of rails to use
- *******************************************************************/
-void railfence_encipher(int key, const char *plaintext, char *ciphertext) {
-    int line, i, skip, length = strlen(plaintext), j = 0, k = 0;
-    
-    for (line = 0; line < key - 1; line++) {
-        skip = 2 * (key - line - 1);
-        k = 0;
-        
-        for (i = line; i < length;) {
-            ciphertext[j] = plaintext[i];
-            
-            if ((line == 0) || (k % 2 == 0))
-                i += skip;
-            else
-                i += 2 * (key - 1) - skip;
-            
-            j++;
-            k++;
-        }
-    }
-    
-    for (i = line; i < length; i += 2 * (key - 1))
-        ciphertext[j++] = plaintext[i];
-    
-    ciphertext[j] = '\0'; /* Null terminate */
-}
-
-/*******************************************************************
- * void railfence_decipher(int key, const char *ciphertext, char *plaintext)
- * - Uses railfence transposition cipher to decipher some text.
- * - takes a key, string of ciphertext, result returned in plaintext.
- * - plaintext should be an array the same size as plaintext.
- * - The key is the number of rails to use
- *******************************************************************/
-void railfence_decipher(int key, const char *ciphertext, char *plaintext) {
-    int i, length = strlen(ciphertext), skip, line, j, k = 0;
-    
-    for (line = 0; line < key - 1; line++) {
-        skip = 2 * (key - line - 1);
-        j = 0;
-        
-        for (i = line; i < length;) {
-            plaintext[i] = ciphertext[k++];
-            
-            if ((line == 0) || (j % 2 == 0))
-                i += skip;
-            else
-                i += 2 * (key - 1) - skip;
-            
-            j++;
-        }
-    }
-    
-    for (i = line; i < length; i += 2 * (key - 1))
-        plaintext[i] = ciphertext[k++];
-    
-    plaintext[length] = '\0'; /* Null terminate */
 }
